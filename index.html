@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>Une surprise pour toi 💖</title>
-<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Nunito:wght@400;600;800;900&family=Pacifico&family=Playfair+Display:wght@700&family=Press+Start+2P&display=swap" rel="stylesheet">
@@ -76,23 +75,6 @@
   .strip .pol { background: #fff; padding: 8px 8px 26px; border-radius: 3px; box-shadow: 0 10px 22px -8px rgba(58,33,48,.45); }
   .strip .pol:nth-child(odd) { transform: rotate(-3deg); } .strip .pol:nth-child(even) { transform: rotate(3deg) translateY(8px); }
   .strip img { display: block; height: 220px; width: auto; max-width: 300px; object-fit: cover; border-radius: 2px; }
-
-  /* ---------- Envoi par mail ---------- */
-  #mail-wrap {
-    position: fixed; inset: 0; z-index: 96; display: flex; align-items: center; justify-content: center; padding: 16px;
-    background: rgba(255, 214, 227, .6); backdrop-filter: blur(5px); -webkit-backdrop-filter: blur(5px);
-    opacity: 0; pointer-events: none; transition: opacity .4s;
-  }
-  #mail-wrap.show { opacity: 1; pointer-events: auto; }
-  #mail-wrap .pad-card { position: relative; }
-  #mail-wrap input {
-    width: 100%; font: 700 17px Nunito, sans-serif; color: var(--ink); padding: 14px 16px; margin: 6px 0 12px;
-    border: 2px dashed #fbb9cd; border-radius: 14px; background: var(--rose-50); outline: none;
-  }
-  #mail-wrap input:focus { border-style: solid; border-color: var(--rose-400); }
-  #mail-send { width: 100%; background: linear-gradient(135deg, var(--rose-400), var(--rose-600)); color: #fff; box-shadow: 0 10px 25px -8px rgba(230,46,102,.7); }
-  #mail-status { min-height: 22px; margin-top: 12px; font-weight: 800; color: var(--rose-600); font-size: 14px; }
-  #mail-close { position: absolute; top: 8px; right: 10px; background: none; font-size: 22px; padding: 4px 8px; color: var(--ink-soft); }
 
   /* ---------- Photos qui flottent en fond ---------- */
   .float-photo {
@@ -711,20 +693,8 @@
     <figure class="polaroid" id="polaroid-2"></figure>
     <p id="final-msg"></p>
     <div class="final-sigs"><span class="moi" id="final-moi"></span><span>💖</span><img id="final-elle" alt=""></div>
-    <button id="mailbtn" class="dl">Recevoir par mail 💌</button><br>
-    <button id="dl">Enregistrer en image 📸</button><br>
+    <button id="dl" class="dl">Recevoir mon contrat 📩</button><br>
     <button id="reread">Relire le contrat</button>
-  </div>
-</div>
-
-<div id="mail-wrap">
-  <div class="pad-card">
-    <button id="mail-close" aria-label="Fermer">×</button>
-    <h3 class="rainbow-text">Recevoir le contrat 💌</h3>
-    <p>Écris ton adresse mail, je t'envoie ton contrat signé</p>
-    <input id="mail-input" type="email" inputmode="email" autocomplete="email" placeholder="ton@email.com">
-    <button id="mail-send">Envoyer 💌</button>
-    <div id="mail-status"></div>
   </div>
 </div>
 
@@ -761,9 +731,6 @@ const CONFIG = {
   photos: ["photo1.jpg", "photo2.jpg", "photo3.jpg", "photo4.jpg", "photo5.jpg", "photo6.jpg"],
   legendePhoto: "Nous deux 💕",
 
-  // 💌 Envoi du contrat par mail (EmailJS, gratuit) : colle ici tes 3 clés
-  emailjs: { publicKey: "", serviceId: "", templateId: "" },
-  siteUrl: "https://gaspinhow.github.io/surprise/",   // l'adresse de ton site, ex : "https://gaspinhow.github.io/cdi/"
 
 
   bandeau: "💖 LE CONTRAT DE L'AMOUR 💖 UNE SEULE QUESTION ✨ UNE SEULE BONNE RÉPONSE 💕 SIGNATURE OBLIGATOIRE 🌹 ",
@@ -1170,41 +1137,11 @@ $("dl").addEventListener("click", async () => {
   catch (e) { c = await makeContractImage(false); blob = await new Promise(r => c.toBlob(r, "image/png")); }
   const file = new File([blob], "contrat-de-l-amour.png", { type: "image/png" });
   try {
-    if (navigator.canShare && navigator.canShare({ files: [file] })) { await navigator.share({ files: [file], title: "Le Contrat de l'Amour 💖" }); btn.textContent = "Enregistrer en image 📸"; return; }
-  } catch (e) { if (e && e.name === "AbortError") { btn.textContent = "Enregistrer en image 📸"; return; } }
+    if (navigator.canShare && navigator.canShare({ files: [file] })) { await navigator.share({ files: [file], title: "Le Contrat de l'Amour 💖" }); btn.textContent = "Recevoir mon contrat 📩"; return; }
+  } catch (e) { if (e && e.name === "AbortError") { btn.textContent = "Recevoir mon contrat 📩"; return; } }
   const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = "contrat-de-l-amour.png";
   document.body.appendChild(a); a.click(); a.remove();
-  btn.textContent = "Image enregistrée ✅";
-});
-
-/* ---------- Envoi du contrat par mail ---------- */
-$("mailbtn").addEventListener("click", () => { $("mail-wrap").classList.add("show"); $("mail-status").textContent = ""; setTimeout(() => $("mail-input").focus(), 300); });
-$("mail-close").addEventListener("click", () => $("mail-wrap").classList.remove("show"));
-$("mail-send").addEventListener("click", async () => {
-  const email = $("mail-input").value.trim(), st = $("mail-status"), btn = $("mail-send");
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { st.textContent = "Hmm, cette adresse a l'air bizarre 🤔"; return; }
-  const cfg = CONFIG.emailjs;
-  if (!cfg.publicKey || !cfg.serviceId || !cfg.templateId || !window.emailjs) {
-    st.textContent = "Oups, l'envoi par mail n'est pas prêt… Enregistre-le en image 📸";
-    return;
-  }
-  btn.disabled = true; btn.textContent = "Envoi en cours… ✨"; st.textContent = "";
-  const base = CONFIG.siteUrl || location.href.split("#")[0].replace(/index\.html$/, "");
-  try {
-    await emailjs.send(cfg.serviceId, cfg.templateId, {
-      to_email: email,
-      premier_jour: fmt(essai),
-      date_signature: fmt(new Date()),
-      photo_url: mainPhoto ? new URL(mainPhoto, base).href : "",
-      site_url: base + "#contrat"
-    }, { publicKey: cfg.publicKey });
-    btn.textContent = "Envoyé ! 💌"; st.textContent = "Regarde ta boîte mail 😘";
-    burst(innerWidth / 2, innerHeight / 2, 40);
-    setTimeout(() => $("mail-wrap").classList.remove("show"), 2600);
-  } catch (e) {
-    btn.disabled = false; btn.textContent = "Envoyer 💌";
-    st.textContent = "L'envoi a raté 😢 Réessaie dans un instant";
-  }
+  btn.textContent = "Contrat reçu 💌";
 });
 
 $("reread").addEventListener("click", () => {
